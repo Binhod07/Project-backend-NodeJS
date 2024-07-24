@@ -10,6 +10,7 @@
     "routesDir": "src/routes/v1"
   },
   "compilerOptions": {
+    "typeRoots": ["node_modules/@types"],
     "baseUrl": "./",
     "paths": {
       "@/*": ["*"]
