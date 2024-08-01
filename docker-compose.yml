@@ -1,0 +1,33 @@
+
+version: '3.9'                                    #Specifies the version of the Docker Compose file format
+
+services:                                         #Defines the list of services (containers) that will be run.
+  mongodb:                                        #This is the name of the MongoDB service. It will create a container with this name.
+    image: mongo:latest                           #Specifies the Docker image to use for this service.
+    container_name: new-db-container              #Names the container new-db-container instead of a random name.
+    ports:                                        #Maps network ports from the host to the container.
+      - "27017:27017"                             #Maps port 27017 on the host to port 27017 in the container. 
+    volumes:                                      #Mounts host directories or volumes to the container for persistent storage.
+      - mongo-data:/data/db                       #Maps the named volume mongo-data to /data/db inside the container. This is where MongoDB stores its data files.
+
+  node:                                           #This is the name of the Node.js service. It will create a container with this name.
+    build:                                        #Specifies the build context and Dockerfile for this service context: .
+      context: .                                  #Sets the build context to the current directory (`.`).     
+      dockerfile: Dockerfile.dev                  #Specifies the Dockerfile to use for building the image. This assumes you have a Dockerfile in the current directory.
+    container_name: new-myapp-container           #Names the container new-myapp-container instead of a random name. 
+    depends_on:                                   #Specifies dependencies between services. This ensures that the MongoDB service starts before the Node.js service.
+      - mongodb
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URL=mongodb://new-db-container:27017/auth
+      - PORT=3000
+
+    ports:
+      - "4000:3000"
+    volumes:                                      #Manages data storage for containers, allowing data to persist beyond the container lifecycle.
+      - .:/app:delegated                          #.: The current directory on the host. /app: The directory in the container where the current directory is mounted. :delegated: An optional flag that can help with performance by allowing the host and container to operate on the file system asynchronously.
+      - /app/node_modules
+    command: sh -c "yarn install && yarn run dev" #Overrides the default command to run when the container starts.
+
+volumes:
+  mongo-data:
