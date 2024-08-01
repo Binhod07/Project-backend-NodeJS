@@ -8,9 +8,12 @@
     "test": "jest",
     "dev": "yarn tsoa:gen && nodemon src/server.ts",
     "build": "node build-script.js",
-    "start": "node -r dotenv/config ./build/server.js dotenv_config_path=./src/configs/.env.production"
+    "start": "node -r dotenv/config ./build/server.js dotenv_config_path=./src/configs/.env.production",
+    "docker-compose:start": "docker-compose up -d --build",
+    "docker-compose:stop": "docker-compose down"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.621.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",
@@ -38,6 +41,7 @@
     "yup": "^1.4.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.24.9",
     "@babel/preset-typescript": "^7.24.7",
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.12",
