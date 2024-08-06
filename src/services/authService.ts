@@ -1,67 +1,102 @@
 import {
   CognitoIdentityProviderClient,
-  InitiateAuthCommand,
   SignUpCommand,
   ConfirmSignUpCommand,
-  AuthFlowType,
+  InitiateAuthCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
+import * as crypto from "crypto";
+import configs from "../utils/config";
 
-const client = new CognitoIdentityProviderClient({
-  region: process.env.AWS_REGION,
-});
+const client = new CognitoIdentityProviderClient({ region: configs.awsRegion });
 
-export const signUp = async (
+const generateSecretHash = (username: string): string => {
+  return crypto
+    .createHmac("SHA256", configs.cognitoClientSecret)
+    .update(username + configs.cognitoClientId)
+    .digest("base64");
+};
+
+export const signUpUser = async (
   username: string,
   password: string,
-  email: string
+  attributes: { name: string; phoneNumber?: string; email?: string }
 ) => {
-  const params = {
-    ClientId: process.env.COGNITO_CLIENT_ID!,
+  const secretHash = generateSecretHash(username);
+  const userAttributes = [{ Name: "name", Value: attributes.name }];
+
+  if (attributes.phoneNumber) {
+    userAttributes.push({
+      Name: "phone_number",
+      Value: attributes.phoneNumber,
+    });
+  }
+
+  if (attributes.email) {
+    userAttributes.push({ Name: "email", Value: attributes.email });
+  }
+
+  const command = new SignUpCommand({
+    ClientId: configs.cognitoClientId,
     Username: username,
     Password: password,
-    UserAttributes: [{ Name: "email", Value: email }],
-  };
+    SecretHash: secretHash,
+    UserAttributes: userAttributes,
+  });
 
   try {
-    const command = new SignUpCommand(params);
-    return await client.send(command);
+    const response = await client.send(command);
+    return {
+      message:
+        "Sign up successful. Please check your phone or email for verification.",
+      userSub: response.UserSub,
+    };
   } catch (error: any) {
-    console.error("Error during sign-up:", error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
-export const confirmSignUp = async (username: string, code: string) => {
-  const params = {
-    ClientId: process.env.COGNITO_CLIENT_ID!,
+export const verifyUser = async (username: string, code: string) => {
+  const secretHash = generateSecretHash(username);
+  const command = new ConfirmSignUpCommand({
+    ClientId: configs.cognitoClientId,
     Username: username,
     ConfirmationCode: code,
-  };
+    SecretHash: secretHash,
+  });
 
   try {
-    const command = new ConfirmSignUpCommand(params);
-    return await client.send(command);
+    const response = await client.send(command);
+    return { message: "User verified successfully.", response };
   } catch (error: any) {
-    console.error("Error during confirmation:", error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
-export const signIn = async (username: string, password: string) => {
-  const params = {
-    AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
-    ClientId: process.env.COGNITO_CLIENT_ID!,
+export const signInUser = async (username: string, password: string) => {
+  const secretHash = generateSecretHash(username);
+  const command = new InitiateAuthCommand({
+    ClientId: configs.cognitoClientId,
+    AuthFlow: "USER_PASSWORD_AUTH",
     AuthParameters: {
       USERNAME: username,
       PASSWORD: password,
+      SECRET_HASH: secretHash,
     },
-  };
+  });
 
   try {
-    const command = new InitiateAuthCommand(params);
-    return await client.send(command);
+    const response = await client.send(command);
+    const authResult = response.AuthenticationResult;
+    return { message: "Sign-in successful!", authResult };
   } catch (error: any) {
-    console.error("Error during sign-in:", error);
-    throw error;
+    if (error.name === "NotAuthorizedException") {
+      throw new Error("The username or password is incorrect.");
+    } else if (error.name === "UserNotConfirmedException") {
+      throw new Error("The user has not been confirmed.");
+    } else if (error.name === "PasswordResetRequiredException") {
+      throw new Error("A password reset is required.");
+    } else {
+      throw new Error(error.message);
+    }
   }
 };

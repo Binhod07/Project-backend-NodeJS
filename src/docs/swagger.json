@@ -6,7 +6,98 @@
 		"parameters": {},
 		"requestBodies": {},
 		"responses": {},
-		"schemas": {},
+		"schemas": {
+			"User": {
+				"properties": {
+					"fullName": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					},
+					"role": {
+						"type": "string"
+					},
+					"age": {
+						"type": "number",
+						"format": "double"
+					},
+					"gender": {
+						"type": "string",
+						"enum": [
+							"male",
+							"female"
+						]
+					}
+				},
+				"required": [
+					"fullName",
+					"email",
+					"password",
+					"role"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SignUpBody": {
+				"properties": {
+					"username": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"username",
+					"password",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"VerifyBody": {
+				"properties": {
+					"username": {
+						"type": "string"
+					},
+					"code": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"username",
+					"code"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SignInBody": {
+				"properties": {
+					"username": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"username",
+					"password"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
 		"securitySchemes": {}
 	},
 	"info": {
@@ -18,9 +109,213 @@
 		"contact": {}
 	},
 	"paths": {
-		"/api/v1/auth/signup": {
+		"/api/v1/users": {
+			"get": {
+				"operationId": "GetAllUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"default": "1",
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": "10",
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sortBy",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"age",
+								"fullName"
+							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "sortOrder",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"asc",
+								"desc"
+							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "gender",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"male",
+								"female"
+							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "minAge",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "maxAge",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/users/{id}": {
+			"get": {
+				"operationId": "GetUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/User"
+										}
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"gender": {
+										"type": "string",
+										"enum": [
+											"male",
+											"female"
+										]
+									},
+									"age": {
+										"type": "number",
+										"format": "double"
+									},
+									"status": {
+										"type": "string"
+									},
+									"password": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									},
+									"fullName": {
+										"type": "string"
+									}
+								},
+								"type": "object"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/users/register": {
 			"post": {
-				"operationId": "Register",
+				"operationId": "CreateUser",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -39,10 +334,24 @@
 						"application/json": {
 							"schema": {
 								"properties": {
-									"email": {
+									"gender": {
+										"type": "string",
+										"enum": [
+											"male",
+											"female"
+										]
+									},
+									"age": {
+										"type": "number",
+										"format": "double"
+									},
+									"fullName": {
 										"type": "string"
 									},
 									"password": {
+										"type": "string"
+									},
+									"email": {
 										"type": "string"
 									},
 									"username": {
@@ -50,8 +359,11 @@
 									}
 								},
 								"required": [
-									"email",
+									"gender",
+									"age",
+									"fullName",
 									"password",
+									"email",
 									"username"
 								],
 								"type": "object"
@@ -61,9 +373,9 @@
 				}
 			}
 		},
-		"/api/v1/auth/confirm": {
+		"/api/v1/auth/signup": {
 			"post": {
-				"operationId": "Confirm",
+				"operationId": "Signup",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -74,6 +386,9 @@
 						}
 					}
 				},
+				"tags": [
+					"Authentication"
+				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
@@ -81,19 +396,37 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"code": {
-										"type": "string"
-									},
-									"username": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"code",
-									"username"
-								],
-								"type": "object"
+								"$ref": "#/components/schemas/SignUpBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/verify": {
+			"post": {
+				"operationId": "Verify",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Authentication"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/VerifyBody"
 							}
 						}
 					}
@@ -102,7 +435,7 @@
 		},
 		"/api/v1/auth/signin": {
 			"post": {
-				"operationId": "Login",
+				"operationId": "SignIn",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -113,6 +446,9 @@
 						}
 					}
 				},
+				"tags": [
+					"Authentication"
+				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
@@ -120,19 +456,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"password": {
-										"type": "string"
-									},
-									"username": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"password",
-									"username"
-								],
-								"type": "object"
+								"$ref": "#/components/schemas/SignInBody"
 							}
 						}
 					}

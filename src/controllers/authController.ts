@@ -1,62 +1,67 @@
-import { Request, Response } from "express";
-import { signUp, confirmSignUp, signIn } from "../services/authService";
+import { Controller, Route, Post, Body, Tags } from "tsoa";
+import { signUpUser, verifyUser, signInUser } from "../services/authService";
 
-// Utility function to handle error messages
-const getErrorMessage = (error: unknown): string => {
-  if (error instanceof Error) return error.message;
-  return String(error);
-};
+interface SignUpBody {
+  username: string;
+  password: string;
+  name: string;
+}
 
-// Sign-up controller
-export const signUpController = async (req: Request, res: Response) => {
-  const { username, password, email } = req.body;
+interface VerifyBody {
+  username: string;
+  code: string;
+}
 
-  try {
-    const response = await signUp(username, password, email);
-    res.status(200).json({
-      message: "User signed up successfully",
-      data: response,
-    });
-  } catch (error) {
-    res.status(400).json({
-      message: "Error signing up",
-      error: getErrorMessage(error),
-    });
+interface SignInBody {
+  username: string;
+  password: string;
+}
+
+@Tags("Authentication")
+@Route("api/v1/auth")
+export class AuthController extends Controller {
+  @Post("signup")
+  public async signup(@Body() body: SignUpBody): Promise<any> {
+    const { username, password, name } = body;
+    const isPhoneNumber = username.startsWith("+");
+    const attributes = { name } as any;
+
+    if (isPhoneNumber) {
+      attributes.phoneNumber = username;
+    } else {
+      attributes.email = username;
+    }
+
+    try {
+      const response = await signUpUser(username, password, attributes);
+      return response;
+    } catch (error: any) {
+      this.setStatus(400);
+      return { error: error.message };
+    }
   }
-};
 
-// Confirm sign-up controller
-export const confirmSignUpController = async (req: Request, res: Response) => {
-  const { username, code } = req.body;
-
-  try {
-    const response = await confirmSignUp(username, code);
-    res.status(200).json({
-      message: "User confirmed successfully",
-      data: response,
-    });
-  } catch (error) {
-    res.status(400).json({
-      message: "Error confirming user",
-      error: getErrorMessage(error),
-    });
+  @Post("verify")
+  public async verify(@Body() body: VerifyBody): Promise<any> {
+    const { username, code } = body;
+    try {
+      const response = await verifyUser(username, code);
+      return response;
+    } catch (error: any) {
+      this.setStatus(400);
+      return { error: error.message };
+    }
   }
-};
 
-// Sign-in controller
-export const signInController = async (req: Request, res: Response) => {
-  const { username, password } = req.body;
-
-  try {
-    const response = await signIn(username, password);
-    res.status(200).json({
-      message: "User signed in successfully",
-      data: response,
-    });
-  } catch (error) {
-    res.status(400).json({
-      message: "Error signing in",
-      error: getErrorMessage(error),
-    });
+  @Post("signin")
+  public async signIn(@Body() body: SignInBody): Promise<any> {
+    const { username, password } = body;
+    try {
+      const response = await signInUser(username, password);
+      return response;
+    } catch (error: any) {
+      this.setStatus(401);
+      return { error: error.message };
+    }
   }
-};
+}
