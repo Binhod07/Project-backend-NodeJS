@@ -19,6 +19,8 @@ console.log("Loaded environment variables:", {
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   REDIRECT_URI: process.env.REDIRECT_URI,
+  AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
 });
 
 // Define a schema for the environment variables using yup
@@ -46,6 +48,8 @@ const envVarsSchema = yup.object().shape({
     .string()
     .required("GOOGLE_CLIENT_SECRET is a required field"),
   REDIRECT_URI: yup.string().required("REDIRECT_URI is a required field"),
+  AWS_ACCESS_KEY_ID: yup.string().required(),
+  AWS_SECRET_ACCESS_KEY: yup.string().required(),
 });
 
 // Validate the environment variables
@@ -67,8 +71,10 @@ const configs = {
   cognitoClientSecret: envVars.COGNITO_CLIENT_SECRET,
   cognitoUserPoolId: envVars.COGNITO_USER_POOL_ID,
   googleClientId: envVars.GOOGLE_CLIENT_ID,
-  redirectUri: envVars.REDIRECT_URI,
+  cognitoRedirectUri: envVars.REDIRECT_URI,
   googleClientSecret: envVars.GOOGLE_CLIENT_SECRET,
+  awsAccessKeyId: envVars.AWS_ACCESS_KEY_ID,
+  awsSecretAccessKey: envVars.AWS_SECRET_ACCESS_KEY,
 };
 
 export default configs;

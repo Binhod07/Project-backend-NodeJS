@@ -13,7 +13,7 @@
     "docker-compose:stop": "docker-compose down"
   },
   "dependencies": {
-    "@aws-sdk/client-cognito-identity-provider": "^3.621.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.625.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",

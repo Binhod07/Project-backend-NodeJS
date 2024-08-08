@@ -18,7 +18,7 @@ console.log("Loaded environment variables:", {
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   REDIRECT_URI: process.env.REDIRECT_URI,
-  COGNITO_USER_POOL_DOMAIN: process.env.COGNITO_USER_POOL_DOMAIN,
+  
 });
 
 // Ensure all necessary environment variables are defined
@@ -58,10 +58,7 @@ if (!process.env.REDIRECT_URI) {
   console.error("REDIRECT_URI is a required field");
   process.exit(1);
 }
-if (!process.env.COGNITO_USER_POOL_DOMAIN) {
-  console.error("COGNITO_USER_POOL_DOMAIN is a required field");
-  process.exit(1);
-}
+
 
 import app from "./app";
 import configs from "./utils/config";
